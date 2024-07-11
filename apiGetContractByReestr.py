@@ -45,7 +45,14 @@ def getDocs(reestrNumber):
      PRIZ = getContract(reestrNumber,"PRIZ")
      PRIZP = getContract(reestrNumber,"PRIZP")
      RPEC = getContract(reestrNumber,"RPEC")
-     #EA = getContract(reestrNumber,"EA")
+     EA = getContract(reestrNumber,"EA")
      RRK = getContract(reestrNumber,"RRK")
      totalData=  RGK+RPGZ+PRIZ+RPEC+RRK+PRIZP
      return totalData
+
+
+def getDocsSpecType(reestrNumbe,arrType):
+    totalData=[];
+    for at in arrType:
+     totalData = totalData+getContract(reestrNumbe, at)
+    return totalData
