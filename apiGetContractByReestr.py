@@ -2,7 +2,6 @@ import requests
 import parsingXML
 import uuid
 import urllib3
-import numpy
 
 from datetime import datetime, timezone
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)

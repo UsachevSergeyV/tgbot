@@ -1,8 +1,11 @@
 import logging
 import  telebot
+import SystemState
 import apiGetContractByReestr
 import  GetFileArchive
+import botHelper
 import fileManager
+import  re
 logging.basicConfig(level=logging.WARNING)
 fileToken = open('token','r')
 token = fileToken.readline()
@@ -16,44 +19,67 @@ bot = telebot.TeleBot(token)
 def handle_text(message):
     logging.warning("Пользователь {0} запросил информацию о {1}".format( message.from_user.full_name, message.text))
     if message.text.isnumeric():
-        markup = telebot.types.InlineKeyboardMarkup(row_width=1)
-        btn1 = telebot.types.InlineKeyboardButton("Контракт",callback_data="callback_C")
-        btn2 = telebot.types.InlineKeyboardButton('Закупка', callback_data ="callback_Z")
-        btn3 = telebot.types.InlineKeyboardButton('План график', callback_data="callback_PG")
-        btn4 = telebot.types.InlineKeyboardButton('Проект контракта',callback_data="callback_PK")
-        btn5 = telebot.types.InlineKeyboardButton('Проверить ВСЁ',callback_data="callback_hz")
-        markup.add(btn1, btn2, btn3, btn4,btn5)
-        bot.reply_to(message, text="Что это'?", reply_markup=markup)
+        bot.reply_to(message, text="Что это'?", reply_markup=botHelper.firstBtn())
+        state = SystemState.setStete(message.chat.id,"RegNumber", message.text)
     else:
         bot.send_message(message.from_user.id,"Не понятно что это, не похоже на цифры!",reply_to_message_id=message.id)
+
+
 
 @bot.callback_query_handler(func=lambda callback: True)
 def callback_message(callback):
     logging.warning("Вызван collback на текст {0} с типом {1} пользователем {2}".format(callback.message.reply_to_message.text,callback.data,callback.message.from_user.full_name))
-    media =[]
-    streams = []
     arrsubSystem=[]
-    if(str(callback.data).startswith("callback")):
-        #bot.send_message(callback.message.chat.id, "Вычисляем..",reply_to_message_id=callback.message.message_id-1)
-        if callback.data == "callback_C":
-            arrsubSystem.append("RGK")
-        elif callback.data =="callback_Z":
-            arrsubSystem.append("PRIZ")
-        elif callback.data =="callback_PG":
-            arrsubSystem.append("RPGZ")
-        elif callback.data =="callback_PK":
-            arrsubSystem.append("RPEC")
-        elif callback.data =="callback_hz":
-            arrsubSystem.append("RGK")
-            arrsubSystem.append("RPEC")
-            arrsubSystem.append("RPGZ")
-            arrsubSystem.append("PRIZ")
-            arrsubSystem.append("PRIZ")
-            arrsubSystem.append("PRIZP")
-            arrsubSystem.append("RRK")
+    if(str(callback.data).startswith("callback_type")):
+        typeDoc = re.search(r'callback_type_(.*)', callback.data).group(1)
+        SystemState.setStete(callback.message.chat.id, "Type", typeDoc)
+        if typeDoc == 'ALL': arrsubSystem.append(["RGK", "RPEC", "RPGZ", "PRIZ", "PRIZ", "PRIZP", "RRK"])
+        else:  arrsubSystem.append(typeDoc)
         nameFile = GetFileArchive.getFile(apiGetContractByReestr.getDocsSpecType(callback.message.reply_to_message.text, arrsubSystem))
-        nameFile = fileManager.killSig(nameFile)
-        for n in nameFile:
+        if(len(nameFile)!=0):
+            #nameFile = fileManager.killSig(nameFile)
+            #Удаляем сиги,перекладывааем всё в 1 архив, получаем перечень файлов
+            newNameFileAndArrayType = fileManager.killSigAndAddToOneZIP(nameFile,callback.message.reply_to_message.text,callback.message.reply_to_message.text)
+            SystemState.setStete(callback.message.chat.id, "Path", newNameFileAndArrayType[0])
+            newMarkup=botHelper.createNewMarkup(newNameFileAndArrayType[1],typeBtn="kind")
+            bot.send_message(
+                         text="уточни!",
+                         chat_id=callback.message.chat.id,
+                         reply_to_message_id=callback.message.reply_to_message.id,
+                         reply_markup=newMarkup )
+            logging.warning("Отдаем кнопки с уточнением вида")
+        else:
+            bot.send_message(callback.message.chat.id, "ничего не найдено", reply_to_message_id=callback.message.reply_to_message.id)
+
+
+    elif(str(callback.data).startswith("kind_")):
+        kind = re.search(r'kind_(.*)', callback.data).group(1)
+        logging.warning("Пользователь {0} интересуется видом {1}".format(callback.message.from_user.full_name,kind))
+        SystemState.setStete(callback.message.chat.id, "Kind", kind)
+        sysUser = SystemState.getStete(callback.message.chat.id)
+        pattToNewFileWithOnlyKind = fileManager.getNameFileConcretKind(sysUser)
+        #пока отдаем без уточнений
+        media = []
+        streams = []
+        openfile = open(pattToNewFileWithOnlyKind, "rb")
+        streams.append(openfile)
+        media.append(telebot.types.InputMediaDocument(media=openfile))
+        if len(media) == 0:
+            bot.send_message(callback.message.chat.id, "ничего не найдено", reply_to_message_id=callback.message.reply_to_message.id)
+        else:
+            bot.send_media_group(chat_id=callback.message.chat.id, media=media, reply_to_message_id=callback.message.reply_to_message.id)
+            fileManager.Summon_Mr_Proper(pattToNewFileWithOnlyKind)
+        #потоки закрываем
+        for s in streams:
+            s.close()
+
+bot.polling(non_stop=True, interval=0)
+print("press any key")
+
+'''
+          #Дальнейший код имеет смысл если мы отдаем архивами по 100, если будем сувать всё в 1 архив и отдавать по типам то в этом смысла нет
+  для тестирования эту часть пока скорем
+    for n in nameFile:
             openfile = open(n,"rb")
             streams.append(openfile)
             media.append(telebot.types.InputMediaDocument(media=openfile))
@@ -69,8 +95,4 @@ def callback_message(callback):
         fileManager.Summon_Mr_Proper(nameFile)
     else:
         bot.send_message(callback.message.chat.id, "Непонятно делать то  что..",reply_to_message_id=callback.message.message_id-1)
-
-
-bot.polling(non_stop=True, interval=0)
-
-print("press any key")
+'''
