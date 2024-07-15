@@ -44,13 +44,14 @@ def killSigAndAddToOneZIP(arrFile, name, regnumb):
     return newname,list(kinds.keys())
 
 def getNameFileConcretKind(sysUser):
-    if os.path.exists(str(sysUser.Path)):
-        nameNewFile = str(sysUser.Path).split('/')[0]+"/"+str(sysUser.RegNumber)+"_"+sysUser.Kind+".zip"
+
+    if os.path.exists(str(sysUser["Path"])):
+        nameNewFile = str(sysUser["Path"]).split('/')[0]+"/"+str(sysUser["RegNumber"])+"_"+str(sysUser["Kind"])+".zip"
         zout = zipfile.ZipFile(nameNewFile, 'w')
-        zin = zipfile.ZipFile(str(sysUser.Path), 'r')
+        zin = zipfile.ZipFile(str(sysUser["Path"]), 'r')
         for item in zin.infolist():
             buffer = zin.read(item.filename)
-            if (str(item.filename).startswith(str(sysUser.Kind))):
+            if (str(item.filename).startswith(str(sysUser["Kind"]))):
                 zout.writestr(item, buffer)
         zin.close()
         zout.close()

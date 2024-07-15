@@ -68,10 +68,10 @@ def callback_message(callback):
             bot.send_message(callback.message.chat.id, "ничего не найдено", reply_to_message_id=callback.message.reply_to_message.id)
         else:
             bot.send_media_group(chat_id=callback.message.chat.id, media=media, reply_to_message_id=callback.message.reply_to_message.id)
-            fileManager.Summon_Mr_Proper(pattToNewFileWithOnlyKind)
         #потоки закрываем
         for s in streams:
             s.close()
+        fileManager.Summon_Mr_Proper(pattToNewFileWithOnlyKind)
 
 bot.polling(non_stop=True, interval=0)
 print("press any key")
