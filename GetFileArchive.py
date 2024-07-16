@@ -11,15 +11,15 @@ def getFile(arrayUrl):
             if requests.get(url).status_code==200: #urllib.request.urlopen(url).getcode() == 200:
                 break
             else:
-                logging.warning("файл не найден, ждемс ["+str(i)+"]")
+                print("файл не найден, ждемс ["+str(i)+"]")
                 time.sleep(1)
             if(i==25):
                 {
-                    logging.WARNING("файл не повился")
+                    print("файл не повился")
                 }
                 return []
         urllib.request.urlretrieve(url, fileName)
-        logging.warning("файл найден")
+        print("файл найден")
         fileForRet.append(fileName)
     return fileForRet
 

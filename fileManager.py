@@ -1,12 +1,15 @@
-import logging
+
 import uuid
 import zipfile
 import os
 def Summon_Mr_Proper(arrFile):
     for af in arrFile:
         os.remove(path=af)
-    logging.warning("выданные файлы удалены");
+    print("выданные файлы удалены");
 
+def Summon_Mr_Proper_For_Delete_Single_File(nameFile):
+    os.remove(path=nameFile)
+    print("выданные файлы удалены");
 def killSig(arrFile):
     for i in range(0,len(arrFile)):
         zin = zipfile.ZipFile(arrFile[i], 'r')
@@ -35,7 +38,7 @@ def killSigAndAddToOneZIP(arrFile, name, regnumb):
                     kinds[tmpkind] = 1
                 else:
                     kinds[tmpkind] += 1
-                item.filename = tmpkind+"_"+regnumb+"_"+str(kinds[tmpkind])+".zip"
+                item.filename = tmpkind+"_"+regnumb+"_"+str(kinds[tmpkind])+".xml"
                 zout.writestr(item, buffer)
 
         zin.close()

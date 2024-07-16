@@ -1,4 +1,6 @@
 import logging
+import time
+
 import  telebot
 import SystemState
 import apiGetContractByReestr
@@ -6,21 +8,26 @@ import  GetFileArchive
 import botHelper
 import fileManager
 import  re
-logging.basicConfig(level=logging.WARNING)
+from datetime import datetime, timezone
+
+logging.basicConfig(
+    level=logging.WARNING,
+    filename="log/error/err",
+    filemode='a',
+    format="%(asctime)s %(levelname)s %(message)s")
 fileToken = open('token','r')
 token = fileToken.readline()
 fileToken.close()
-logging.debug(token)
-
-
 
 bot = telebot.TeleBot(token)
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
-    logging.warning("Пользователь {0} запросил информацию о {1}".format( message.from_user.full_name, message.text))
+    print("Пользователь {0} запросил информацию о {1}".format( message.from_user.full_name, message.text))
     if message.text.isnumeric():
         bot.reply_to(message, text="Что это'?", reply_markup=botHelper.firstBtn())
         state = SystemState.setStete(message.chat.id,"RegNumber", message.text)
+    elif message.text=="FFS":
+        raise ("Ошибка")
     else:
         bot.send_message(message.from_user.id,"Не понятно что это, не похоже на цифры!",reply_to_message_id=message.id)
 
@@ -28,7 +35,7 @@ def handle_text(message):
 
 @bot.callback_query_handler(func=lambda callback: True)
 def callback_message(callback):
-    logging.warning("Вызван collback на текст {0} с типом {1} пользователем {2}".format(callback.message.reply_to_message.text,callback.data,callback.message.from_user.full_name))
+    print("Вызван collback на текст {0} с типом {1} пользователем {2}".format(callback.message.reply_to_message.text,callback.data,callback.message.chat.username))
     arrsubSystem=[]
     if(str(callback.data).startswith("callback_type")):
         typeDoc = re.search(r'callback_type_(.*)', callback.data).group(1)
@@ -47,14 +54,14 @@ def callback_message(callback):
                          chat_id=callback.message.chat.id,
                          reply_to_message_id=callback.message.reply_to_message.id,
                          reply_markup=newMarkup )
-            logging.warning("Отдаем кнопки с уточнением вида")
+            print("Отдаем кнопки с уточнением вида")
         else:
             bot.send_message(callback.message.chat.id, "ничего не найдено", reply_to_message_id=callback.message.reply_to_message.id)
 
 
     elif(str(callback.data).startswith("kind_")):
         kind = re.search(r'kind_(.*)', callback.data).group(1)
-        logging.warning("Пользователь {0} интересуется видом {1}".format(callback.message.from_user.full_name,kind))
+        print("Пользователь {0} интересуется видом {1}".format(callback.message.chat.username,kind))
         SystemState.setStete(callback.message.chat.id, "Kind", kind)
         sysUser = SystemState.getStete(callback.message.chat.id)
         pattToNewFileWithOnlyKind = fileManager.getNameFileConcretKind(sysUser)
@@ -71,9 +78,22 @@ def callback_message(callback):
         #потоки закрываем
         for s in streams:
             s.close()
-        fileManager.Summon_Mr_Proper(pattToNewFileWithOnlyKind)
+        fileManager.Summon_Mr_Proper_For_Delete_Single_File(pattToNewFileWithOnlyKind)
 
-bot.polling(non_stop=True, interval=0)
+
+err=None
+
+def zeroPoint():
+    try:
+        bot.polling(non_stop=True, interval=0)
+    except Exception as e:
+        time.sleep(2)
+        logging.error("Бот упал. "+str(e))
+        print("Бот упал. пробуем поднять")
+        zeroPoint()
+
+
+zeroPoint()
 print("press any key")
 
 '''
