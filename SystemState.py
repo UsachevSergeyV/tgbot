@@ -19,4 +19,9 @@ def setStete(user_id,state,value):
     if user_id not in State:
         State[user_id] = {}
     State[user_id][state] = value
+    if state=="RegNumber":
+        State[user_id]["Type"] = None
+        State[user_id]["Kind"] = None
+        State[user_id]["Path"] = None
+
 

@@ -96,24 +96,3 @@ def zeroPoint():
 
 zeroPoint()
 print("press any key")
-
-'''
-          #Дальнейший код имеет смысл если мы отдаем архивами по 100, если будем сувать всё в 1 архив и отдавать по типам то в этом смысла нет
-  для тестирования эту часть пока скорем
-    for n in nameFile:
-            openfile = open(n,"rb")
-            streams.append(openfile)
-            media.append(telebot.types.InputMediaDocument(media=openfile))
-        if len(media)==0:
-            bot.send_message(callback.message.chat.id, "ничего не найдено",reply_to_message_id=callback.message.message_id-1)
-        else:
-            for i in range(0,round(len(media)//10)+1):
-                subMedia = media[i*10:i*10+10]
-                if len(subMedia) >0:
-                    bot.send_media_group(chat_id=callback.message.chat.id, media=subMedia, reply_to_message_id=callback.message.id-1)
-        for s in streams:
-            s.close()
-        fileManager.Summon_Mr_Proper(nameFile)
-    else:
-        bot.send_message(callback.message.chat.id, "Непонятно делать то  что..",reply_to_message_id=callback.message.message_id-1)
-'''

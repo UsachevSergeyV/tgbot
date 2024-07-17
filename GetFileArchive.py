@@ -14,9 +14,7 @@ def getFile(arrayUrl):
                 print("файл не найден, ждемс ["+str(i)+"]")
                 time.sleep(1)
             if(i==25):
-                {
-                    print("файл не повился")
-                }
+                print("файл не повился")
                 return []
         urllib.request.urlretrieve(url, fileName)
         print("файл найден")
