@@ -35,7 +35,7 @@ def handle_text(message):
 
 @bot.callback_query_handler(func=lambda callback: True)
 def callback_message(callback):
-    print("Вызван collback на текст {0} с типом {1} пользователем {2}".format(callback.message.reply_to_message.text,callback.data,callback.message.chat.username))
+    print("Вызван collback на текст {0} с типом {1} пользователем {2}".format(callback.message.reply_to_message.text,callback.data,callback.from_user.full_name))
     arrsubSystem=[]
     if(str(callback.data).startswith("callback_type")):
         typeDoc = re.search(r'callback_type_(.*)', callback.data).group(1)
@@ -55,14 +55,13 @@ def callback_message(callback):
                          chat_id=callback.message.chat.id,
                          reply_to_message_id=callback.message.reply_to_message.id,
                          reply_markup=newMarkup )
-            print("Отдаем кнопки с уточнением вида")
         else:
             bot.send_message(callback.message.chat.id, "ничего не найдено", reply_to_message_id=callback.message.reply_to_message.id)
 
 
     elif(str(callback.data).startswith("kind_")):
         kind = re.search(r'kind_(.*)', callback.data).group(1)
-        print("Пользователь {0} интересуется видом {1}".format(callback.message.chat.username,kind))
+        print("Пользователь {0} интересуется видом {1}".format(callback.from_user.full_name,kind))
         SystemState.setStete(callback.message.chat.id, "Kind", kind)
         sysUser = SystemState.getStete(callback.message.chat.id)
         pattToNewFileWithOnlyKind = fileManager.getNameFileConcretKind(sysUser)
