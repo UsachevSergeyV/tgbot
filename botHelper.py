@@ -12,6 +12,6 @@ def firstBtn():
     btn2 = telebot.types.InlineKeyboardButton('Закупка', callback_data="callback_type_PRIZ")
     btn3 = telebot.types.InlineKeyboardButton('План график', callback_data="callback_type_RPGZ")
     btn4 = telebot.types.InlineKeyboardButton('Проект контракта', callback_data="callback_type_RPEC")
-    btn5 = telebot.types.InlineKeyboardButton('Проверить ВСЁ', callback_data="callback_type_ALL")
-    markup.add(btn1, btn2, btn3, btn4, btn5)
+   # btn5 = telebot.types.InlineKeyboardButton('Проверить ВСЁ', callback_data="callback_type_ALL")
+    markup.add(btn1, btn2, btn3, btn4 )
     return  markup

@@ -50,6 +50,8 @@ def getNameFileConcretKind(sysUser):
 
     if os.path.exists(str(sysUser["Path"])):
         nameNewFile = str(sysUser["Path"]).split('/')[0]+"/"+str(sysUser["RegNumber"])+"_"+str(sysUser["Kind"])+".zip"
+        if  sysUser["Kind"]=="all":
+            return sysUser["Path"]
         zout = zipfile.ZipFile(nameNewFile, 'w')
         zin = zipfile.ZipFile(str(sysUser["Path"]), 'r')
         for item in zin.infolist():

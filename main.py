@@ -40,7 +40,7 @@ def callback_message(callback):
     if(str(callback.data).startswith("callback_type")):
         typeDoc = re.search(r'callback_type_(.*)', callback.data).group(1)
         SystemState.setStete(callback.message.chat.id, "Type", typeDoc)
-        if typeDoc == 'ALL': arrsubSystem.append(["RGK", "RPEC", "RPGZ", "PRIZ", "PRIZ", "PRIZP", "RRK"])
+        if typeDoc == 'ALL': arrsubSystem.append("RGK", "RPEC", "RPGZ", "PRIZ", "PRIZ", "PRIZP", "RRK")
         else:  arrsubSystem.append(typeDoc)
         nameFile = GetFileArchive.getFile(apiGetContractByReestr.getDocsSpecType(callback.message.reply_to_message.text, arrsubSystem))
         if(len(nameFile)!=0):
@@ -49,6 +49,7 @@ def callback_message(callback):
             newNameFileAndArrayType = fileManager.killSigAndAddToOneZIP(nameFile,callback.message.reply_to_message.text,callback.message.reply_to_message.text)
             SystemState.setStete(callback.message.chat.id, "Path", newNameFileAndArrayType[0])
             newMarkup=botHelper.createNewMarkup(newNameFileAndArrayType[1],typeBtn="kind")
+            newMarkup.add(telebot.types.InlineKeyboardButton(text="Скачать всё", callback_data="kind_all"))
             bot.send_message(
                          text="уточни!",
                          chat_id=callback.message.chat.id,
