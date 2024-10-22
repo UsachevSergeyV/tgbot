@@ -1,6 +1,6 @@
 import logging
 import time
-
+from datetime import date
 import  telebot
 import SystemState
 import apiGetContractByReestr
@@ -22,7 +22,7 @@ fileToken.close()
 bot = telebot.TeleBot(token)
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
-    print("Пользователь {0} запросил информацию о {1}".format( message.from_user.full_name, message.text))
+    print("{2} - Пользователь {0} запросил информацию о {1}".format( message.from_user.full_name, message.text,datetime.now()))
     if message.text.isnumeric():
         bot.reply_to(message, text="Что это'?", reply_markup=botHelper.firstBtn())
         state = SystemState.setStete(message.chat.id,"RegNumber", message.text)
@@ -35,12 +35,12 @@ def handle_text(message):
 
 @bot.callback_query_handler(func=lambda callback: True)
 def callback_message(callback):
-    print("Вызван collback на текст {0} с типом {1} пользователем {2}".format(callback.message.reply_to_message.text,callback.data,callback.from_user.full_name))
+    print("{3} - Вызван collback на текст {0} с типом {1} пользователем {2}".format(callback.message.reply_to_message.text,callback.data,callback.from_user.full_name ,datetime.now()))
     arrsubSystem=[]
     if(str(callback.data).startswith("callback_type")):
         typeDoc = re.search(r'callback_type_(.*)', callback.data).group(1)
         SystemState.setStete(callback.message.chat.id, "Type", typeDoc)
-        if typeDoc == 'ALL': arrsubSystem.append("RGK", "RPEC", "RPGZ", "PRIZ", "PRIZ", "PRIZP", "RRK")
+        if typeDoc == 'ALL': arrsubSystem.append("RGK", "RPEC", "RPGZ", "PRIZ", "PRIZP", "RRK")
         else:  arrsubSystem.append(typeDoc)
         nameFile = GetFileArchive.getFile(apiGetContractByReestr.getDocsSpecType(callback.message.reply_to_message.text, arrsubSystem))
         if(len(nameFile)!=0):
@@ -61,7 +61,7 @@ def callback_message(callback):
 
     elif(str(callback.data).startswith("kind_")):
         kind = re.search(r'kind_(.*)', callback.data).group(1)
-        print("Пользователь {0} интересуется видом {1}".format(callback.from_user.full_name,kind))
+        print("{2} - Пользователь {0} интересуется видом {1}".format(callback.from_user.full_name,kind, datetime.now()))
         SystemState.setStete(callback.message.chat.id, "Kind", kind)
         sysUser = SystemState.getStete(callback.message.chat.id)
         pattToNewFileWithOnlyKind = fileManager.getNameFileConcretKind(sysUser)
@@ -89,7 +89,7 @@ def zeroPoint():
     except Exception as e:
         time.sleep(2)
         logging.error("Бот упал. "+str(e))
-        print("Бот упал. пробуем поднять")
+        print("{0} - Бот упал. пробуем поднять".format(datetime.now()))
         zeroPoint()
 
 

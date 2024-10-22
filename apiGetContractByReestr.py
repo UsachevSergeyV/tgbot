@@ -5,28 +5,27 @@ import urllib3
 
 from datetime import datetime, timezone
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-endpoint = "https://int44.zakupki.gov.ru/eis-integration/services/getDocsMis2"
+endpoint = "https://int44.zakupki.gov.ru/eis-integration/services/getDocsLE2"
 
 def getContract(reestrNumber, subsystem):
     createTime = datetime.now(timezone.utc).isoformat(timespec='seconds').replace('+00:00', 'Z')
-    body=u"""<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://zakupki.gov.ru/fz44/get-docs-mis/ws">
-    <soapenv:Header/>
-    <soapenv:Body>
-      <ws:getPublicDocsByReestrNumberRequest>
+    body=u"""<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://zakupki.gov.ru/fz44/get-docs-le/ws">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ws:getDocsByReestrNumberRequest>
          <index>
-         <id>{id}</id>
-            <sender>test_005</sender>
-            <createDateTime>2024-07-05T09:45:47Z</createDateTime>
+            <id>{id}</id>
+            <createDateTime>2024-10-22T08:45:47Z</createDateTime>
             <mode>PROD</mode>
          </index>
-         <selectionParams44>
+         <selectionParams>
             <subsystemType>{sub}</subsystemType>
-             <reestrNumber>{reestrNumber}</reestrNumber>
-            <isAllOrganizations44>true</isAllOrganizations44>
-         </selectionParams44>
-      </ws:getPublicDocsByReestrNumberRequest>
-    </soapenv:Body>
-    </soapenv:Envelope>""".format(id=uuid.uuid4(),reestrNumber=reestrNumber,sub = subsystem)
+            <reestrNumber>{reestrNumber}</reestrNumber>
+         </selectionParams>
+      </ws:getDocsByReestrNumberRequest>
+   </soapenv:Body>
+</soapenv:Envelope>""".format(id=uuid.uuid4(),reestrNumber=reestrNumber,sub = subsystem)
+
     body = body.encode('utf-8')
     session = requests.session()
     session.headers = {"Content-Type": "text/xml; charset=utf-8"}
